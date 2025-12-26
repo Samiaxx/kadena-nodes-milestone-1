@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
+// Client-side only maps
 const LeafletMap = dynamic(() => import("../components/LeafletMap"), {
   ssr: false,
 });
