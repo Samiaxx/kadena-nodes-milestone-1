@@ -1,29 +1,42 @@
 "use client";
 
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import type { NodeItem } from "@/data/nodes";
 
-export default function LeafletMap({ nodes }: { nodes: NodeItem[] }) {
+export default function LeafletMap({
+  nodes,
+  theme,
+}: {
+  nodes: any[];
+  theme: "dark" | "light";
+}) {
+  const tileUrl =
+    theme === "dark"
+      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
   return (
-    <MapContainer
-      center={[20, 0]}
-      zoom={2}
-      style={{ height: "650px", width: "100%" }}
-    >
-      <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+    <MapContainer center={[20, 0]} zoom={2} style={{ height: "100%" }}>
+      <TileLayer url={tileUrl} />
 
-      {nodes.map((n) => (
+      {nodes.map((node) => (
         <CircleMarker
-          key={n.id}
-          center={[n.lat, n.lng]}
-          radius={8}
-          pathOptions={{
-            color: n.status === "Online" ? "lime" : "red",
-            fillOpacity: 0.9,
-          }}
+          key={node.id}
+          center={[node.lat, node.lng]}
+          radius={6}
+          color={node.status === "online" ? "lime" : "red"}
         >
-          <Popup>{n.name}</Popup>
+          <Tooltip>
+            <strong>{node.name}</strong>
+            <br />
+            ID: {node.id}
+            <br />
+            Type: {node.type}
+            <br />
+            Status: {node.status}
+            <br />
+            Latency: {node.latency} ms
+          </Tooltip>
         </CircleMarker>
       ))}
     </MapContainer>
