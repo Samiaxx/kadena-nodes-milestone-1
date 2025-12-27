@@ -2,14 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 export default function MapboxGlobe() {
   const mapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Prevent SSR / hydration issues
-    if (typeof window === "undefined") return;
-
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
     if (!token) {
@@ -25,23 +23,21 @@ export default function MapboxGlobe() {
       container: mapRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
       projection: "globe",
-      zoom: 1.6,
+      zoom: 1.5,
       center: [0, 20],
     });
 
     map.on("style.load", () => {
       map.setFog({
-        color: "rgb(11, 15, 25)",
-        "high-color": "rgb(36, 92, 223)",
-        "horizon-blend": 0.15,
-        "space-color": "rgb(0, 0, 0)",
-        "star-intensity": 0.35,
+        range: [0.8, 8],
+        color: "#0b1020",
+        "high-color": "#000000",
+        "space-color": "#000000",
+        "horizon-blend": 0.2,
       });
     });
 
-    return () => {
-      map.remove();
-    };
+    return () => map.remove();
   }, []);
 
   return (
@@ -49,7 +45,7 @@ export default function MapboxGlobe() {
       ref={mapRef}
       style={{
         width: "100%",
-        height: "100%",
+        height: "600px",
         background: "#070b12",
       }}
     />
