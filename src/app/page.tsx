@@ -1,45 +1,53 @@
 "use client";
 
+/**
+ * IMPORTANT:
+ * This line forces Vercel to re-evaluate data on every request
+ * and prevents build-time caching (fixes 3 nodes vs 10 nodes issue)
+ */
+export const dynamic = "force-dynamic";
+
 import { useMemo, useState } from "react";
 import LeafletMap from "@/components/LeafletMap";
 import MapboxGlobe from "@/components/MapboxGlobe";
 import { nodes } from "@/data/nodes";
 
-/**
- * MAIN PAGE
- * Controls:
- * - Map / Globe toggle
- * - Region filter
- * - Stats
- * - Shared node data
- */
 export default function HomePage() {
-  /* ---------------- STATE ---------------- */
+  /* ================= STATE ================= */
   const [view, setView] = useState<"map" | "globe">("map");
   const [regionFilter, setRegionFilter] = useState("All");
 
-  /* ---------------- FILTERED NODES ---------------- */
+  /* ================= FILTER NODES ================= */
   const filteredNodes = useMemo(() => {
     if (regionFilter === "All") return nodes;
     return nodes.filter((n) => n.region === regionFilter);
   }, [regionFilter]);
 
-  /* ---------------- STATS ---------------- */
+  /* ================= STATS ================= */
   const totalNodes = filteredNodes.length;
-  const onlineNodes = filteredNodes.filter((n) => n.status === "Online").length;
 
-  const regionsCount = new Set(filteredNodes.map((n) => n.region)).size;
+  const onlineNodes = filteredNodes.filter(
+    (n) => n.status === "Online"
+  ).length;
+
+  const regionsCount = new Set(
+    filteredNodes.map((n) => n.region)
+  ).size;
 
   const avgLatency =
-    filteredNodes.reduce((sum, n) => sum + n.latency, 0) /
-    (filteredNodes.length || 1);
+    filteredNodes.length === 0
+      ? 0
+      : Math.round(
+          filteredNodes.reduce((sum, n) => sum + n.latency, 0) /
+            filteredNodes.length
+        );
 
-  /* ---------------- UI ---------------- */
+  /* ================= UI ================= */
   return (
     <main className="min-h-screen bg-gradient-to-b from-black to-gray-950 text-white">
       {/* ================= HEADER ================= */}
       <header className="px-8 py-5 border-b border-gray-800 flex items-center justify-between">
-        {/* LEFT: TITLE */}
+        {/* LEFT */}
         <div>
           <h1 className="text-2xl font-bold text-teal-400">
             Kadena Nexus
@@ -49,7 +57,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* RIGHT: VIEW TOGGLE */}
+        {/* RIGHT */}
         <div className="flex gap-2">
           <button
             onClick={() => setView("map")}
@@ -80,10 +88,7 @@ export default function HomePage() {
         <StatCard label="Total Nodes" value={totalNodes} />
         <StatCard label="Online" value={onlineNodes} />
         <StatCard label="Regions" value={regionsCount} />
-        <StatCard
-          label="Avg Latency"
-          value={`${Math.round(avgLatency)} ms`}
-        />
+        <StatCard label="Avg Latency" value={`${avgLatency} ms`} />
       </section>
 
       {/* ================= FILTER ================= */}
@@ -119,7 +124,7 @@ export default function HomePage() {
   );
 }
 
-/* ================= STAT CARD COMPONENT ================= */
+/* ================= STAT CARD ================= */
 function StatCard({
   label,
   value,
