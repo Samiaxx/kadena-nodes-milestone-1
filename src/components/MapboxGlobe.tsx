@@ -2,52 +2,44 @@
 
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { NodeItem } from "@/data/nodes";
 
-export default function MapboxGlobe() {
-  const mapRef = useRef<HTMLDivElement | null>(null);
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+
+export default function MapboxGlobe({ nodes }: { nodes: NodeItem[] }) {
+  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-
-    if (!token) {
-      console.error("❌ Mapbox token missing");
-      return;
-    }
-
-    mapboxgl.accessToken = token;
-
     if (!mapRef.current) return;
 
     const map = new mapboxgl.Map({
       container: mapRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
       projection: "globe",
-      zoom: 1.5,
+      zoom: 1.4,
       center: [0, 20],
     });
 
-    map.on("style.load", () => {
-      map.setFog({
-        range: [0.8, 8],
-        color: "#0b1020",
-        "high-color": "#000000",
-        "space-color": "#000000",
-        "horizon-blend": 0.2,
+    map.on("load", () => {
+      nodes.forEach((node) => {
+        const el = document.createElement("div");
+        el.className = `globe-dot ${node.status === "Online" ? "pulse" : ""}`;
+
+        new mapboxgl.Marker(el)
+          .setLngLat([node.lng, node.lat])
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML(`
+              <strong>${node.name}</strong><br/>
+              ${node.city}, ${node.country}<br/>
+              ${node.status} • ${node.latency} ms
+            `)
+          )
+          .addTo(map);
       });
     });
 
     return () => map.remove();
-  }, []);
+  }, [nodes]);
 
-  return (
-    <div
-      ref={mapRef}
-      style={{
-        width: "100%",
-        height: "600px",
-        background: "#070b12",
-      }}
-    />
-  );
+  return <div ref={mapRef} style={{ height: "520px", width: "100%" }} />;
 }

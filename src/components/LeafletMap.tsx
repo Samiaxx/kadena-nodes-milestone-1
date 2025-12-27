@@ -1,46 +1,32 @@
 "use client";
 
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { nodes } from "@/data/nodes";
+import { NodeItem } from "@/data/nodes";
 
-export default function LeafletMap() {
+export default function LeafletMap({ nodes }: { nodes: NodeItem[] }) {
   return (
-    <div style={{ width: "100%", height: "600px" }}>
-      <MapContainer
-        center={[20, 0]}
-        zoom={2}
-        style={{ width: "100%", height: "100%" }}
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          attribution='© OpenStreetMap © Carto'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        />
+    <div style={{ height: "520px", width: "100%" }}>
+      <MapContainer center={[20, 0]} zoom={2} style={{ height: "100%", width: "100%" }}>
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
 
         {nodes.map((node) => (
           <CircleMarker
             key={node.id}
             center={[node.lat, node.lng]}
-            radius={8}
+            radius={7}
             pathOptions={{
-              color: node.status === "online" ? "#2dd4bf" : "#ef4444",
-              fillColor: node.status === "online" ? "#2dd4bf" : "#ef4444",
-              fillOpacity: 0.9,
+              color: node.status === "Online" ? "#4fd1c5" : "#ef4444",
+              className: node.status === "Online" ? "pulse" : "",
             }}
           >
-            <Popup>
-              <div style={{ fontSize: "0.85rem" }}>
-                <strong>{node.name}</strong>
-                <br />
-                Region: {node.region}
-                <br />
-                Status: {node.status}
-                <br />
-                Latency:{" "}
-                {node.status === "online" ? `${node.latency} ms` : "N/A"}
-              </div>
-            </Popup>
+            <Tooltip direction="top" offset={[0, -8]} opacity={1}>
+              <strong>{node.name}</strong>
+              <br />
+              {node.city}, {node.country}
+              <br />
+              {node.status} • {node.latency} ms
+            </Tooltip>
           </CircleMarker>
         ))}
       </MapContainer>

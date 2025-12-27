@@ -1,179 +1,138 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import LeafletMap from "@/components/LeafletMap";
+import MapboxGlobe from "@/components/MapboxGlobe";
+import { nodes } from "@/data/nodes";
 
-const LeafletMap = dynamic(() => import("../components/LeafletMap"), {
-  ssr: false,
-});
-
-const MapboxGlobe = dynamic(() => import("../components/MapboxGlobe"), {
-  ssr: false,
-});
-
-export default function Home() {
+/**
+ * MAIN PAGE
+ * Controls:
+ * - Map / Globe toggle
+ * - Region filter
+ * - Stats
+ * - Shared node data
+ */
+export default function HomePage() {
+  /* ---------------- STATE ---------------- */
   const [view, setView] = useState<"map" | "globe">("map");
-  const [filters, setFilters] = useState({
-    region: "All",
-    type: "All",
-    status: "All",
-  });
+  const [regionFilter, setRegionFilter] = useState("All");
 
+  /* ---------------- FILTERED NODES ---------------- */
+  const filteredNodes = useMemo(() => {
+    if (regionFilter === "All") return nodes;
+    return nodes.filter((n) => n.region === regionFilter);
+  }, [regionFilter]);
+
+  /* ---------------- STATS ---------------- */
+  const totalNodes = filteredNodes.length;
+  const onlineNodes = filteredNodes.filter((n) => n.status === "Online").length;
+
+  const regionsCount = new Set(filteredNodes.map((n) => n.region)).size;
+
+  const avgLatency =
+    filteredNodes.reduce((sum, n) => sum + n.latency, 0) /
+    (filteredNodes.length || 1);
+
+  /* ---------------- UI ---------------- */
   return (
-    <main
-      style={{
-        height: "100vh",
-        background: "#070b12",
-        color: "#e6edf3",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* HEADER */}
-      <header
-        style={{
-          padding: "1rem",
-          borderBottom: "1px solid #0e1629",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+    <main className="min-h-screen bg-gradient-to-b from-black to-gray-950 text-white">
+      {/* ================= HEADER ================= */}
+      <header className="px-8 py-5 border-b border-gray-800 flex items-center justify-between">
+        {/* LEFT: TITLE */}
         <div>
-          <h1 style={{ margin: 0, color: "#4fd1c5" }}>Kadena Nexus</h1>
-          <p style={{ margin: 0, fontSize: "0.75rem", color: "#9aa4b2" }}>
+          <h1 className="text-2xl font-bold text-teal-400">
+            Kadena Nexus
+          </h1>
+          <p className="text-sm text-gray-400">
             Global Node Map · v1
           </p>
         </div>
 
-        <div>
+        {/* RIGHT: VIEW TOGGLE */}
+        <div className="flex gap-2">
           <button
             onClick={() => setView("map")}
-            style={{
-              marginRight: "0.5rem",
-              padding: "0.4rem 0.8rem",
-              background: view === "map" ? "#4fd1c5" : "#0c1220",
-              color: view === "map" ? "#000" : "#e6edf3",
-              border: "1px solid #1f2937",
-              cursor: "pointer",
-            }}
+            className={`px-4 py-1 rounded text-sm ${
+              view === "map"
+                ? "bg-teal-400 text-black"
+                : "bg-gray-800 text-white"
+            }`}
           >
             Map
           </button>
 
           <button
             onClick={() => setView("globe")}
-            style={{
-              padding: "0.4rem 0.8rem",
-              background: view === "globe" ? "#4fd1c5" : "#0c1220",
-              color: view === "globe" ? "#000" : "#e6edf3",
-              border: "1px solid #1f2937",
-              cursor: "pointer",
-            }}
+            className={`px-4 py-1 rounded text-sm ${
+              view === "globe"
+                ? "bg-teal-400 text-black"
+                : "bg-gray-800 text-white"
+            }`}
           >
             Globe
           </button>
         </div>
       </header>
 
-      {/* STATS BAR */}
-      {view === "map" && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "12px",
-            padding: "12px",
-            borderBottom: "1px solid #0e1629",
-          }}
+      {/* ================= STATS ================= */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4 px-8 py-6">
+        <StatCard label="Total Nodes" value={totalNodes} />
+        <StatCard label="Online" value={onlineNodes} />
+        <StatCard label="Regions" value={regionsCount} />
+        <StatCard
+          label="Avg Latency"
+          value={`${Math.round(avgLatency)} ms`}
+        />
+      </section>
+
+      {/* ================= FILTER ================= */}
+      <section className="px-8 pb-4 flex items-center gap-4">
+        <label className="text-sm text-gray-400">Region:</label>
+
+        <select
+          value={regionFilter}
+          onChange={(e) => setRegionFilter(e.target.value)}
+          className="bg-black text-white border border-gray-700 rounded px-3 py-2"
         >
-          {[
-            { label: "Total Nodes", value: 3 },
-            { label: "Online", value: 3 },
-            { label: "Regions", value: 3 },
-            { label: "Avg Latency", value: "55 ms" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              style={{
-                background: "#0c1220",
-                border: "1px solid #1f2937",
-                borderRadius: "8px",
-                padding: "10px",
-              }}
-            >
-              <div style={{ fontSize: "11px", color: "#9aa4b2" }}>
-                {stat.label}
-              </div>
-              <div
-                style={{
-                  fontSize: "18px",
-                  fontWeight: 600,
-                  color: "#4fd1c5",
-                }}
-              >
-                {stat.value}
-              </div>
-            </div>
-          ))}
+          <option value="All">All Regions</option>
+          <option value="North America">North America</option>
+          <option value="Europe">Europe</option>
+          <option value="Asia">Asia</option>
+          <option value="Africa">Africa</option>
+          <option value="South America">South America</option>
+          <option value="Oceania">Oceania</option>
+        </select>
+      </section>
+
+      {/* ================= MAP / GLOBE ================= */}
+      <section className="px-8 pb-8">
+        <div className="h-[70vh] rounded-lg overflow-hidden border border-gray-800">
+          {view === "map" ? (
+            <LeafletMap nodes={filteredNodes} />
+          ) : (
+            <MapboxGlobe nodes={filteredNodes} />
+          )}
         </div>
-      )}
-
-      {/* FILTER BAR */}
-      {view === "map" && (
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            padding: "12px",
-            borderBottom: "1px solid #0e1629",
-          }}
-        >
-          <select
-            value={filters.region}
-            onChange={(e) =>
-              setFilters({ ...filters, region: e.target.value })
-            }
-          >
-            <option>All</option>
-            <option>North America</option>
-            <option>Europe</option>
-            <option>Asia</option>
-          </select>
-
-          <select
-            value={filters.type}
-            onChange={(e) =>
-              setFilters({ ...filters, type: e.target.value })
-            }
-          >
-            <option>All</option>
-            <option>Validator</option>
-            <option>Full Node</option>
-            <option>RPC Node</option>
-          </select>
-
-          <select
-            value={filters.status}
-            onChange={(e) =>
-              setFilters({ ...filters, status: e.target.value })
-            }
-          >
-            <option>All</option>
-            <option>Online</option>
-            <option>Offline</option>
-          </select>
-        </div>
-      )}
-
-      {/* MAP / GLOBE */}
-      <section style={{ flex: 1 }}>
-        {view === "map" ? (
-          <LeafletMap filters={filters} />
-        ) : (
-          <MapboxGlobe />
-        )}
       </section>
     </main>
+  );
+}
+
+/* ================= STAT CARD COMPONENT ================= */
+function StatCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="bg-gradient-to-br from-gray-900 to-black border border-gray-800 rounded-lg p-4">
+      <p className="text-sm text-gray-400">{label}</p>
+      <p className="text-xl font-semibold text-teal-400 mt-1">
+        {value}
+      </p>
+    </div>
   );
 }
