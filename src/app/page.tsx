@@ -1,118 +1,87 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
-import { nodes } from "@/data/nodes";
 
-const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
+const LeafletMap = dynamic(() => import("../components/LeafletMap"), {
+  ssr: false,
+});
+const GlobeView = dynamic(() => import("../components/GlobeView"), {
   ssr: false,
 });
 
-const MapboxGlobe = dynamic(() => import("@/components/MapboxGlobe"), {
-  ssr: false,
-});
+export type NodeStatus = "online" | "offline";
 
-export default function Home() {
-  const [view, setView] = useState<"map" | "globe">("map"); // MAP FIRST
+export type Node = {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  region: string;
+  status: NodeStatus;
+  type: string;
+};
+
+// ---------------- DATA ----------------
+const nodes: Node[] = [
+  { id: "1", name: "US West", lat: 37.77, lng: -122.41, region: "NA", status: "online", type: "Validator" },
+  { id: "2", name: "US East", lat: 40.71, lng: -74.0, region: "NA", status: "online", type: "Validator" },
+  { id: "3", name: "UK", lat: 51.5, lng: -0.12, region: "EU", status: "online", type: "Full Node" },
+  { id: "4", name: "Germany", lat: 52.52, lng: 13.4, region: "EU", status: "online", type: "Full Node" },
+  { id: "5", name: "India", lat: 28.61, lng: 77.2, region: "AS", status: "offline", type: "Archive" },
+  { id: "6", name: "Japan", lat: 35.68, lng: 139.69, region: "AS", status: "online", type: "Validator" },
+  { id: "7", name: "Brazil", lat: -23.55, lng: -46.63, region: "SA", status: "offline", type: "Archive" },
+  { id: "8", name: "South Africa", lat: -26.2, lng: 28.04, region: "AF", status: "online", type: "Full Node" },
+  { id: "9", name: "Australia", lat: -33.86, lng: 151.2, region: "OC", status: "online", type: "Validator" },
+  { id: "10", name: "Spain", lat: 40.41, lng: -3.7, region: "EU", status: "online", type: "Full Node" },
+];
+
+export default function Page() {
+  const [view, setView] = useState<"map" | "globe">("map");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [region, setRegion] = useState("All");
 
-  const filteredNodes = useMemo(() => {
-    if (region === "All") return nodes;
-    return nodes.filter((n) => n.region === region);
-  }, [region]);
-
-  const regions = useMemo(
-    () => ["All", ...Array.from(new Set(nodes.map((n) => n.region)))],
-    []
-  );
+  const onlineCount = nodes.filter(n => n.status === "online").length;
+  const regions = new Set(nodes.map(n => n.region)).size;
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          theme === "dark"
-            ? "linear-gradient(180deg,#050b14,#02040a)"
-            : "linear-gradient(180deg,#eef3fb,#dbe6f7)",
-        color: theme === "dark" ? "#fff" : "#000",
-        padding: "24px",
-      }}
-    >
-      <h1>Kadena Nexus</h1>
-      <p>Global Node Map · MVP</p>
+    <main className={`${theme === "dark" ? "bg-black text-white" : "bg-white text-black"} min-h-screen px-6 py-8`}>
+      <h1 className="text-4xl font-bold mb-1">Kadena Nexus</h1>
+      <p className="opacity-70 mb-4">Global Node Map · MVP</p>
 
-      {/* CONTROLS */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <button onClick={() => setView("map")}>Map</button>
-        <button onClick={() => setView("globe")}>Globe</button>
-
-        <select value={region} onChange={(e) => setRegion(e.target.value)}>
-          {regions.map((r) => (
-            <option key={r}>{r}</option>
-          ))}
-        </select>
-
-        <button
-          onClick={() =>
-            setTheme((t) => (t === "dark" ? "light" : "dark"))
-          }
-        >
+      {/* Controls */}
+      <div className="flex gap-3 mb-6">
+        <button onClick={() => setView("map")} className="px-3 py-1 rounded bg-gray-200 text-black">Map</button>
+        <button onClick={() => setView("globe")} className="px-3 py-1 rounded bg-gray-200 text-black">Globe</button>
+        <button onClick={() => setTheme(t => t === "dark" ? "light" : "dark")} className="px-3 py-1 rounded bg-gray-200 text-black">
           {theme === "dark" ? "Light Mode" : "Dark Mode"}
         </button>
       </div>
 
-      {/* STATS */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4,1fr)",
-          gap: 16,
-          marginTop: 20,
-        }}
-      >
-        <Stat title="Total Nodes" value={filteredNodes.length} />
-        <Stat
-          title="Online"
-          value={filteredNodes.filter((n) => n.status === "online").length}
-        />
-        <Stat
-          title="Regions"
-          value={new Set(filteredNodes.map((n) => n.region)).size}
-        />
-        <Stat
-          title="Avg Latency"
-          value={`${Math.round(
-            filteredNodes.reduce((a, b) => a + b.latency, 0) /
-              filteredNodes.length
-          )} ms`}
-        />
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Stat title="Total Nodes" value={nodes.length} />
+        <Stat title="Online" value={onlineCount} />
+        <Stat title="Regions" value={regions} />
+        <Stat title="Avg Latency" value="82 ms" />
       </div>
 
-      {/* MAP / GLOBE */}
-      <div style={{ height: 650, marginTop: 24 }}>
-        {view === "map" && (
-          <LeafletMap nodes={filteredNodes} theme={theme} />
-        )}
-        {view === "globe" && (
-          <MapboxGlobe nodes={filteredNodes} theme={theme} />
+      {/* View */}
+      <div className="rounded-xl overflow-hidden border">
+        {view === "map" ? (
+          <LeafletMap nodes={nodes} theme={theme} />
+        ) : (
+          <GlobeView nodes={nodes} />
         )}
       </div>
     </main>
   );
 }
 
-function Stat({ title, value }: { title: string; value: any }) {
+function Stat({ title, value }: { title: string; value: string | number }) {
   return (
-    <div
-      style={{
-        padding: 16,
-        borderRadius: 12,
-        background: "rgba(255,255,255,0.08)",
-      }}
-    >
-      <div style={{ opacity: 0.7 }}>{title}</div>
-      <div style={{ fontSize: 22, fontWeight: 600 }}>{value}</div>
+    <div className="p-4 rounded bg-gray-800 text-white">
+      <p className="text-sm opacity-70">{title}</p>
+      <p className="text-2xl font-bold">{value}</p>
     </div>
   );
 }
