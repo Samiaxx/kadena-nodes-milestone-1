@@ -1,100 +1,59 @@
-/* ================================
-   TAILWIND BASE
-================================ */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+  --bg: #0b1220;
+  --panel: #111a2e;
+  --text: #ffffff;
+  --muted: #9ca3af;
+}
 
-/* ================================
-   LEAFLET (REQUIRED)
-   This MUST be here or map breaks
-================================ */
-@import "leaflet/dist/leaflet.css";
+[data-theme='light'] {
+  --bg: #f3f4f6;
+  --panel: #ffffff;
+  --text: #111827;
+  --muted: #4b5563;
+}
 
-/* ================================
-   ROOT / RESET
-================================ */
 html,
 body {
-  margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
-}
-
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
     sans-serif;
-  background-color: #0b1020;
-  color: #ffffff;
 }
 
-/* ================================
-   NEXT.JS ROOT WRAPPER
-================================ */
-#__next {
-  height: 100%;
+* {
+  box-sizing: border-box;
 }
 
-/* ================================
-   LEAFLET FIXES (CRITICAL)
-================================ */
-
-/* Map container MUST have height */
-.leaflet-container {
-  width: 100%;
-  height: 100%;
-  background: #000;
+.sidebar {
+  background: var(--panel);
+  padding: 16px;
+  width: 260px;
+  height: 100vh;
 }
 
-/* Fix broken tiles */
-.leaflet-tile {
-  image-rendering: auto;
-}
-
-/* Fix tooltip text color */
-.leaflet-tooltip {
-  background: rgba(15, 23, 42, 0.95);
-  color: #fff;
-  border-radius: 6px;
-  border: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  padding: 6px 10px;
-}
-
-/* Remove ugly tooltip arrow */
-.leaflet-tooltip-top:before,
-.leaflet-tooltip-bottom:before,
-.leaflet-tooltip-left:before,
-.leaflet-tooltip-right:before {
-  display: none;
-}
-
-/* ================================
-   LIGHT MODE SUPPORT
-================================ */
-.light body {
-  background-color: #ffffff;
-  color: #000000;
-}
-
-.light .leaflet-container {
-  background: #f8fafc;
-}
-
-.light .leaflet-tooltip {
-  background: rgba(255, 255, 255, 0.95);
-  color: #000;
-}
-
-/* ================================
-   UI HELPERS
-================================ */
-button {
+.button {
+  background: #2563eb;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
   cursor: pointer;
+  margin-bottom: 8px;
 }
 
-select {
-  outline: none;
+.select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 8px;
+}
+
+.stat {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
 }
