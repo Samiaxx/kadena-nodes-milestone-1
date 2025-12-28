@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-type Node = {
+type NodeType = {
   id: string;
   name: string;
   type: string;
@@ -25,7 +25,7 @@ const redIcon = new L.Icon({
   iconAnchor: [16, 32],
 });
 
-const nodes: Node[] = [
+const nodes: NodeType[] = [
   { id: "node-001", name: "US West", type: "Validator", status: "online", lat: 37.7749, lng: -122.4194 },
   { id: "node-002", name: "US East", type: "Validator", status: "online", lat: 40.7128, lng: -74.006 },
   { id: "node-003", name: "Europe", type: "Full Node", status: "offline", lat: 50.1109, lng: 8.6821 },
@@ -39,19 +39,12 @@ const nodes: Node[] = [
 ];
 
 export default function LeafletMap({ theme }: { theme: "light" | "dark" }) {
-  const isDark = theme === "dark";
-
   return (
-    <MapContainer
-      center={[20, 0]}
-      zoom={2}
-      style={{ height: "100vh", width: "100%" }}
-      scrollWheelZoom
-    >
+    <MapContainer center={[20, 0]} zoom={2} style={{ height: "100vh", width: "100%" }}>
       <TileLayer
         attribution="© OpenStreetMap • Carto"
         url={
-          isDark
+          theme === "dark"
             ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         }
@@ -63,33 +56,14 @@ export default function LeafletMap({ theme }: { theme: "light" | "dark" }) {
           position={[node.lat, node.lng]}
           icon={node.status === "online" ? greenIcon : redIcon}
         >
-          <Tooltip
-            direction="top"
-            offset={[0, -10]}
-            opacity={1}
-            className={isDark ? "dark-tooltip" : ""}
-          >
-            <div
-              style={{
-                minWidth: "170px",
-                fontSize: "13px",
-                color: isDark ? "#e5e7eb" : "#111",
-                background: isDark ? "#0f172a" : "#ffffff",
-                padding: "6px 8px",
-                borderRadius: "6px",
-              }}
-            >
+          <Tooltip direction="top" offset={[0, -10]} opacity={1}>
+            <div style={{ minWidth: 160 }}>
               <strong>{node.name}</strong>
               <div>ID: {node.id}</div>
               <div>Type: {node.type}</div>
               <div>
                 Status:{" "}
-                <span
-                  style={{
-                    color: node.status === "online" ? "limegreen" : "red",
-                    fontWeight: 600,
-                  }}
-                >
+                <span style={{ color: node.status === "online" ? "limegreen" : "red" }}>
                   {node.status.toUpperCase()}
                 </span>
               </div>
