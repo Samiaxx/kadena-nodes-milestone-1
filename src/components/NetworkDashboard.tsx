@@ -1,63 +1,44 @@
 "use client";
 
-type DashboardProps = {
-  tps: number;
-  tx24h: number;
-  blockTime: number;
-  activeNodes: number;
-};
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import StatCard from "./StatCard";
+import ViewToggle from "./ViewToggle";
 
-export default function NetworkDashboard({
-  tps,
-  tx24h,
-  blockTime,
-  activeNodes,
-}: DashboardProps) {
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: "16px",
-        padding: "20px",
-      }}
-    >
-      <StatCard label="Live TPS" value={tps} highlight />
-      <StatCard label="24h Transactions" value={tx24h.toLocaleString()} />
-      <StatCard label="Avg Block Time (s)" value={blockTime} />
-      <StatCard label="Active Nodes" value={activeNodes} />
-    </div>
-  );
-}
+const LeafletMap = dynamic(() => import("./LeafletMap"), { ssr: false });
+const GlobeView = dynamic(() => import("./GlobeView"), { ssr: false });
 
-function StatCard({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: number | string;
-  highlight?: boolean;
-}) {
+export default function NetworkDashboard() {
+  const [view, setView] = useState<"map" | "globe">("map");
+
+  // SAFE STATIC DATA (no undefined)
+  const tps = 2.5;
+  const tx24h = 200000;
+  const blockTime = 30;
+  const activeNodes = 20;
+
   return (
-    <div
-      style={{
-        background: "rgba(0,0,0,0.6)",
-        borderRadius: "12px",
-        padding: "20px",
-        color: "#fff",
-        border: highlight ? "1px solid #ff2d8b" : "1px solid #222",
-      }}
-    >
-      <div style={{ fontSize: "12px", opacity: 0.7 }}>{label}</div>
-      <div
-        style={{
-          fontSize: highlight ? "36px" : "24px",
-          fontWeight: 700,
-          marginTop: "6px",
-        }}
-      >
-        {value}
+    <div className="p-6">
+      <h1 className="mb-6 text-2xl font-bold">
+        Kadena Network Dashboard
+      </h1>
+
+      {/* STATS */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <StatCard title="Live TPS" value={tps} />
+        <StatCard title="24h Transactions" value={tx24h} />
+        <StatCard title="Avg Block Time (s)" value={blockTime} />
+        <StatCard title="Active Nodes" value={activeNodes} />
+      </div>
+
+      {/* CONTROLS */}
+      <div className="mb-4">
+        <ViewToggle view={view} onChange={setView} />
+      </div>
+
+      {/* MAP / GLOBE */}
+      <div className="rounded-lg overflow-hidden">
+        {view === "map" ? <LeafletMap /> : <GlobeView />}
       </div>
     </div>
   );

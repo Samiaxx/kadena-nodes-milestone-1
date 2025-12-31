@@ -1,84 +1,18 @@
-:root {
-  --bg: #0b1220;
-  --panel: #111a2e;
-  --text: #ffffff;
-  --muted: #9ca3af;
-}
-
-[data-theme='light'] {
-  --bg: #f3f4f6;
-  --panel: #ffffff;
-  --text: #111827;
-  --muted: #4b5563;
-}
-
-html,
-body {
-  padding: 0;
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-.sidebar {
-  background: var(--panel);
-  padding: 16px;
-  width: 260px;
-  height: 100vh;
-}
-
-.button {
-  background: #2563eb;
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  margin-bottom: 8px;
-}
-
-.select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  margin-top: 8px;
-}
-
-.stat {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
-.globe-node {
-  width: 22px;
-  height: 22px;
+.pulse-marker {
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 12px rgba(0,0,0,0.6);
-  border: 2px solid white;
+  background: rgba(255, 255, 255, 0.7);
+  animation: pulse 1.5s infinite;
 }
 
-.node-tooltip {
-  min-width: 220px;
-  padding: 12px;
-  font-size: 14px;
-  background: rgba(15,15,25,0.95);
-  color: #fff;
-  border-radius: 10px;
-  line-height: 1.6;
-}
-
-.node-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #38bdf8;
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
 }
