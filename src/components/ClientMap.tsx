@@ -1,117 +1,55 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
-import { NodeData } from '@/types/node';
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import { NodeType } from '@/data/nodes';
 
-/* SSR-safe dynamic imports */
-const MapContainer = dynamic(
-  () => import('react-leaflet').then(m => m.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import('react-leaflet').then(m => m.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import('react-leaflet').then(m => m.Marker),
-  { ssr: false }
-);
-const Tooltip = dynamic(
-  () => import('react-leaflet').then(m => m.Tooltip),
-  { ssr: false }
-);
-
-export default function ClientMap({ nodes }: { nodes: NodeData[] }) {
-  const [icons, setIcons] = useState<{
-    online?: any;
-    offline?: any;
-  }>({});
-
-  /* Load Leaflet ONLY in the browser */
-  useEffect(() => {
-    let isMounted = true;
-
-    import('leaflet').then(L => {
-      if (!isMounted) return;
-
-      setIcons({
-        online: L.divIcon({
-          className: '',
-          html: `<div class="node-dot"></div>`,
-          iconSize: [10, 10],
-          iconAnchor: [5, 5],
-        }),
-        offline: L.divIcon({
-          className: '',
-          html: `<div class="node-dot offline"></div>`,
-          iconSize: [10, 10],
-          iconAnchor: [5, 5],
-        }),
-      });
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  /* Avoid rendering markers until icons exist */
-  if (!icons.online || !icons.offline) {
-    return (
-      <div
-        style={{
-          height: '70vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#9aa4bf',
-        }}
-      >
-        Loading map…
-      </div>
-    );
-  }
+export default function ClientMap({
+  nodes,
+  theme,
+}: {
+  nodes: NodeType[];
+  theme: 'light' | 'dark';
+}) {
+  const dark = theme === 'dark';
 
   return (
-    <div style={{ height: '70vh', width: '100%' }}>
-      <MapContainer
-        center={[20, 0]}
-        zoom={2}
-        style={{ height: '100%', width: '100%' }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="© OpenStreetMap contributors"
-        />
+    <MapContainer
+      center={[20, 0]}
+      zoom={2}
+      style={{ height: '100%', width: '100%' }}
+      preferCanvas
+    >
+      <TileLayer
+        url={
+          dark
+            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        }
+      />
 
-        {nodes.map(node => (
-          <Marker
-            key={node.id}
-            position={[node.lat, node.lng]}
-            icon={node.status === 'online' ? icons.online : icons.offline}
-            eventHandlers={{
-              click: () => {
-                alert(
-                  `Node Details
-
-ID: ${node.id}
-Type: ${node.type}
-Location: ${node.city}, ${node.country}
-Status: ${node.status}`
-                );
-              },
-            }}
-          >
-            <Tooltip>
-              <strong>{node.type}</strong><br />
-              {node.city}, {node.country}<br />
-              Status: {node.status}<br />
-              ID: {node.id}
-            </Tooltip>
-          </Marker>
-        ))}
-      </MapContainer>
-    </div>
+      {nodes.map((node) => (
+        <CircleMarker
+          key={node.id}
+          center={[node.lat, node.lng]}
+          radius={8}
+          pathOptions={{
+            color: node.status === 'online' ? '#34f5a2' : '#ff4d4d',
+            fillColor: node.status === 'online' ? '#34f5a2' : '#ff4d4d',
+            fillOpacity: 0.9,
+            weight: 2,
+          }}
+          className={node.status === 'online' ? 'pulse-node' : ''}
+        >
+          <Tooltip direction="top" offset={[0, -6]} opacity={1}>
+            <div>
+              <strong>{node.name}</strong>
+              <br />
+              Status: {node.status}
+            </div>
+          </Tooltip>
+        </CircleMarker>
+      ))}
+    </MapContainer>
   );
 }
