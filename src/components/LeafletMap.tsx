@@ -1,37 +1,32 @@
-"use client";
+'use client';
 
-import { MapContainer, TileLayer, CircleMarker, Tooltip } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { nodes } from "@/data/nodes";
+import dynamic from 'next/dynamic';
+import { NodeData } from '@/types/node';
 
-export default function LeafletMap() {
+const Map = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
+const CircleMarker = dynamic(() => import('react-leaflet').then(m => m.CircleMarker), { ssr: false });
+const Tooltip = dynamic(() => import('react-leaflet').then(m => m.Tooltip), { ssr: false });
+
+export default function LeafletMap({ nodes }: { nodes: NodeData[] }) {
   return (
-    <MapContainer
-      center={[20, 0]}
-      zoom={2}
-      style={{ height: "500px", width: "100%" }}
-    >
-      <TileLayer
-        attribution="© OpenStreetMap"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      {nodes.map((node) => (
+    <Map center={[20, 0]} zoom={2} style={{ height: '70vh' }}>
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      {nodes.map(n => (
         <CircleMarker
-          key={node.id}
-          center={[node.lat, node.lng]}
+          key={n.id}
+          center={[n.lat, n.lng]}
           radius={6}
-          pathOptions={{ color: node.color }}
+          pathOptions={{ color: n.status === 'online' ? '#6cf2c2' : '#ff6b6b' }}
         >
           <Tooltip>
-            <div>
-              <strong>{node.name}</strong>
-              <br />
-              {node.region}
-            </div>
+            <strong>{n.type}</strong><br />
+            {n.city}, {n.country}<br />
+            Status: {n.status}<br />
+            ID: {n.id}
           </Tooltip>
         </CircleMarker>
       ))}
-    </MapContainer>
+    </Map>
   );
 }

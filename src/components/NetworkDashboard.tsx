@@ -1,44 +1,59 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
-import StatCard from "./StatCard";
-import ViewToggle from "./ViewToggle";
-
-const LeafletMap = dynamic(() => import("./LeafletMap"), { ssr: false });
-const GlobeView = dynamic(() => import("./GlobeView"), { ssr: false });
+import { useEffect, useState } from 'react';
+import { fetchCut } from '@/lib/kadena';
+import { calculateTPS } from '@/lib/tps';
 
 export default function NetworkDashboard() {
-  const [view, setView] = useState<"map" | "globe">("map");
+  const [stats, setStats] = useState({
+    tps: 0,
+    tx24h: 0,
+    blockTime: 1.5,
+    activeNodes: 0,
+  });
 
-  // SAFE STATIC DATA (no undefined)
-  const tps = 2.5;
-  const tx24h = 200000;
-  const blockTime = 30;
-  const activeNodes = 20;
+  async function refresh() {
+    try {
+      const cut = await fetchCut();
+      const hashes = cut.hashes || {};
+      const txCount = Object.keys(hashes).length;
+
+      setStats({
+        tps: calculateTPS(txCount),
+        tx24h: txCount * 1440, // extrapolated
+        blockTime: 1.5,
+        activeNodes: txCount,
+      });
+    } catch {
+      // keep last known values
+    }
+  }
+
+  useEffect(() => {
+    refresh();
+    const id = setInterval(refresh, 15000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-bold">
-        Kadena Network Dashboard
-      </h1>
-
-      {/* STATS */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard title="Live TPS" value={tps} />
-        <StatCard title="24h Transactions" value={tx24h} />
-        <StatCard title="Avg Block Time (s)" value={blockTime} />
-        <StatCard title="Active Nodes" value={activeNodes} />
+    <div className="panel" style={{ display: 'flex', gap: 32 }}>
+      <div>
+        <div className="stat">{stats.tps}</div>
+        <div className="label">Current TPS</div>
       </div>
-
-      {/* CONTROLS */}
-      <div className="mb-4">
-        <ViewToggle view={view} onChange={setView} />
+      <div>
+        <div className="stat">
+          {stats.tx24h.toLocaleString()}
+        </div>
+        <div className="label">24h Transactions</div>
       </div>
-
-      {/* MAP / GLOBE */}
-      <div className="rounded-lg overflow-hidden">
-        {view === "map" ? <LeafletMap /> : <GlobeView />}
+      <div>
+        <div className="stat">{stats.blockTime}s</div>
+        <div className="label">Avg Block Time</div>
+      </div>
+      <div>
+        <div className="stat">{stats.activeNodes}</div>
+        <div className="label">Active Nodes</div>
       </div>
     </div>
   );

@@ -1,0 +1,8 @@
+.globe-wrapper {
+  width: 100%;
+  height: 70vh;
+}
+
+canvas {
+  outline: none;
+}

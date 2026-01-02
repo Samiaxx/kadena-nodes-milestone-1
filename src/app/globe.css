@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   GLOBAL RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  background-color: #020617; /* deep dark blue */
+  color: #e5e7eb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* =========================
+   ROOT APP WRAPPER
+========================= */
+#__next {
+  min-height: 100%;
+}
+
+/* =========================
+   DASHBOARD STYLES
+========================= */
+.dashboard {
+  background: linear-gradient(
+    180deg,
+    #020617 0%,
+    #020617 60%,
+    rgba(2, 6, 23, 0.85) 100%
+  );
+  padding: 24px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+/* =========================
+   VIEW TOGGLE BUTTONS
+========================= */
+.view-toggle {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.view-toggle button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid #1e293b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-toggle button:hover {
+  background: #020617;
+  border-color: #22c55e;
+}
+
+.view-toggle button.active {
+  background: #22c55e;
+  color: #020617;
+  border-color: #22c55e;
+}
+
+/* =========================
+   MAP CONTAINER
+========================= */
+.map-wrapper {
+  width: 100%;
+  height: 70vh;
+  background: #020617;
+  border-top: 1px solid #020617;
+}
+
+/* Leaflet fixes */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #020617 !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: #020617 !important;
+  color: #e5e7eb !important;
+  border: 1px solid #1e293b !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(2, 6, 23, 0.7) !important;
+  color: #9ca3af !important;
+}
+
+/* =========================
+   GLOBE CONTAINER
+========================= */
+.globe-wrapper {
+  width: 100%;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    circle at center,
+    rgba(34, 197, 94, 0.15),
+    #020617 70%
+  );
+}
+
+/* Canvas fix */
+canvas {
+  outline: none;
+}
+
+/* =========================
+   TOOLTIP
+========================= */
+.tooltip {
+  background: rgba(2, 6, 23, 0.95);
+  border: 1px solid #1e293b;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #e5e7eb;
+  font-size: 12px;
+}
+
+/* =========================
+   SCROLLBAR (OPTIONAL)
+========================= */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}

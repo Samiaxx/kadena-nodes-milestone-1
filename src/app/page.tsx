@@ -1,9 +1,5 @@
-import NetworkDashboard from "@/components/NetworkDashboard";
+import ClientApp from '@/components/ClientApp';
 
 export default function Page() {
-  return (
-    <main className="min-h-screen bg-slate-900 text-white">
-      <NetworkDashboard />
-    </main>
-  );
+  return <ClientApp />;
 }
